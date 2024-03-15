@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas練習</title>
+</head>
+
+<body>
+    <!-- 嘗試棋格大小44、棋子大小33、棋盤大小720*720、起點30~終點690 -->
+    <canvas id="myCanvas" style="background-color: brown;">
+
+    </canvas>
+    <script>
+        let c = document.getElementById('myCanvas');
+        let ctx = c.getContext("2d");
+        c.width = 720;
+        c.height = 720;
+        // ctx.beginPath();
+        // ctx.moveTo(30, 30);
+        // ctx.lineTo(690, 30);
+        // ctx.closePath();
+        // ctx.strokeStyle = "#000000";
+        // ctx.stroke();
+
+        // ctx.beginPath();
+        // ctx.moveTo(30, 30);
+        // ctx.lineTo(30, 690);
+        // ctx.closePath();
+        // ctx.strokeStyle = "#000000";
+        // ctx.stroke();
+        // 用for loop跑上面那一段看看?
+        // 外迴圈跑col,內迴圈跑row
+        for (let i = 0; i < 15; i++) {
+            for (let j = 0; j < 15; j++) {
+                // row
+                ctx.beginPath();
+                ctx.moveTo(`${(i + 1) * 30}`, `${(j + 1) * 30}`);
+                ctx.lineTo(690, `${(j + 1) * 30}`);
+                ctx.closePath();
+                ctx.strokeStyle = "#000000";
+                ctx.stroke();
+                // col
+                ctx.beginPath();
+                ctx.moveTo(`${(j + 1) * 30}`, `${(i + 1) * 30}`);
+                ctx.lineTo(`${(j + 1) * 30}`, 690);
+                ctx.closePath();
+                ctx.strokeStyle = "#000000";
+                ctx.stroke();
+            }
+        }
+    </script>
+</body>
+
+</html>
