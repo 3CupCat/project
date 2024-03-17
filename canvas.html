@@ -5,50 +5,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas練習</title>
+    <style>
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #overlay img {
+            max-width: 80%;
+            max-height: 80%;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- 嘗試棋格大小44、棋子大小33、棋盤大小720*720、起點30~終點690 -->
-    <canvas id="myCanvas" style="background-color: brown;">
-
-    </canvas>
+    <!-- 嘗試棋格大小40、棋子大小36、棋盤大小640*640、起點40~終點600 -->
+    <canvas id="chessBoard" style="background-color: #d8af3e;"></canvas>
+    <!-- 勝利圖片 -->
+    <div id="overlay" onclick="newGame()">
+        <img id="popupImg" src="" alt="勝者">
+    </div>
+    <!-- 勝利圖片 -->
     <script>
-        let c = document.getElementById('myCanvas');
-        let ctx = c.getContext("2d");
-        c.width = 720;
-        c.height = 720;
-        // ctx.beginPath();
-        // ctx.moveTo(30, 30);
-        // ctx.lineTo(690, 30);
-        // ctx.closePath();
-        // ctx.strokeStyle = "#000000";
-        // ctx.stroke();
-
-        // ctx.beginPath();
-        // ctx.moveTo(30, 30);
-        // ctx.lineTo(30, 690);
-        // ctx.closePath();
-        // ctx.strokeStyle = "#000000";
-        // ctx.stroke();
-        // 用for loop跑上面那一段看看?
-        // 外迴圈跑col,內迴圈跑row
+        let canvas = document.getElementById('chessBoard');
+        let ctx = canvas.getContext("2d");
+        canvas.width = 640;
+        canvas.height = 640;
+        // 宣告陣列儲存奕子資料
+        let chessMapArr = [];
+        // 初始化奕子資料
         for (let i = 0; i < 15; i++) {
+            chessMapArr[i] = [];
             for (let j = 0; j < 15; j++) {
+                chessMapArr[i][j] = 0;
+            }
+        }
+        // 奕子顏色
+        let chessColor = ["black", "white"];
+        // 步數計算
+        let step = 0;
+        // 檢查勝利模式
+        let checkMode = [[0, 1], [1, 0], [1, 1], [1, -1]];
+        // 繪製棋盤
+        for (let i = 0; i < 15; i++) {
+            ctx.beginPath();
+            // row
+            ctx.moveTo(40, `${(i * 40) + 40}`);
+            ctx.lineTo(600, `${(i * 40) + 40}`);
+            // col
+            ctx.moveTo(`${(i * 40) + 40}`, 40);
+            ctx.lineTo(`${(i * 40) + 40}`, 600);
+            ctx.closePath();
+            ctx.strokeStyle = "#000000";
+            ctx.stroke();
+        }
+        // 繪製奕子
+        function myChess(x, y, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        // 滑鼠點擊後，生出奕子
+        canvas.addEventListener('click', function (e) {
+            // 小於邊界設定，點擊不生出奕子
+            if (e.offsetX < 20 || e.offsetX > 620 || e.offsetY < 20 || e.offsetY > 620) {
+                return;
+            }
+            // 變數紀錄奕子x、y軸
+            let xAxis = Math.floor((e.offsetX + 20) / 40) * 40;
+            let yAxis = Math.floor((e.offsetY + 20) / 40) * 40;
+            // 檢查當前位置是否沒有奕子
+            if (chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] == 0) {
+                // 呼叫繪製奕子function
+                myChess(xAxis, yAxis, chessColor[step % 2]);
+                // 繪製奕子後，把資料儲存到陣列中
+                chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] = chessColor[step % 2];
+                // 檢查陣列用
+                // console.log(chessMapArr);
+                // 檢查是否五連珠
+                for (let i = 0; i < 4; i++) {
+                    checkWin(xAxis / 40 - 1, yAxis / 40 - 1, chessColor[step % 2], checkMode[i])
+                }
+                // 計算步數 (這邊或許會有問題，需要在下一場開始前step--;)
+                step++;
+            }
+
+        })
+        // 檢查勝利條件
+        // checkModeArr請帶一維陣列
+        function checkWin(x, y, chess, checkModeArr) {
+            // 紀錄連珠數
+            let cnt = 1;
+            for (let j = 1; j < 5; j++) {
+                let newX = x + j * checkModeArr[0];
+                let newY = y + j * checkModeArr[1];
+                // 檢查x、y軸是否超出棋盤、檢查是否有連珠
+                if (newX >= 0 && newX < 15 && newY >= 0 && newY < 15 && chessMapArr[newX][newY] == chess) {
+                    cnt++;
+                }
+                else {
+                    break;
+                }
+            }
+            for (let k = 1; k < 5; k++) {
+                let newX = x - k * checkModeArr[0];
+                let newY = y - k * checkModeArr[1];
+                // 檢查x、y軸是否超出棋盤、檢查是否有連珠
+                if (newX >= 0 && newX < 15 && newY >= 0 && newY < 15 && chessMapArr[newX][newY] == chess) {
+                    cnt++;
+                }
+                else {
+                    break;
+                }
+            }
+            // 判斷勝利，後續補動畫之類的?
+            if (cnt >= 5) {
+                console.log(`cnt為${cnt}`);
+                gameOver(chessColor[step % 2]);
+            }
+        }
+        // 清空奕子資料
+        function clearChessMapArr() {
+            for (let i = 0; i < 15; i++) {
+                chessMapArr[i] = [];
+                for (let j = 0; j < 15; j++) {
+                    chessMapArr[i][j] = 0;
+                }
+            }
+        }
+        // 清空棋盤
+        function clearChessBoard() {
+            ctx.fillStyle = "#d8af3e";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        // 繪製棋盤
+        function drawChessBoard() {
+            for (let i = 0; i < 15; i++) {
+                ctx.beginPath();
                 // row
-                ctx.beginPath();
-                ctx.moveTo(`${(i + 1) * 30}`, `${(j + 1) * 30}`);
-                ctx.lineTo(690, `${(j + 1) * 30}`);
-                ctx.closePath();
-                ctx.strokeStyle = "#000000";
-                ctx.stroke();
+                ctx.moveTo(40, `${(i * 40) + 40}`);
+                ctx.lineTo(600, `${(i * 40) + 40}`);
                 // col
-                ctx.beginPath();
-                ctx.moveTo(`${(j + 1) * 30}`, `${(i + 1) * 30}`);
-                ctx.lineTo(`${(j + 1) * 30}`, 690);
+                ctx.moveTo(`${(i * 40) + 40}`, 40);
+                ctx.lineTo(`${(i * 40) + 40}`, 600);
                 ctx.closePath();
                 ctx.strokeStyle = "#000000";
                 ctx.stroke();
             }
+        }
+        // 遊戲結束彈跳圖片
+        // 帶勝者資料，產生對應圖片
+        function gameOver(chess) {
+            if (chess == chessColor[0]) {
+                document.getElementById('overlay').style.display = 'flex';
+                document.getElementById('popupImg').src = './img/blackWin.png';
+            }
+            else {
+                document.getElementById('overlay').style.display = 'flex';
+                document.getElementById('popupImg').src = './img/whiteWin.png';
+            }
+        }
+        // 關閉勝利圖、開始下一局
+        function newGame() {
+            document.getElementById('overlay').style.display = 'none';
+            clearChessMapArr();
+            clearChessBoard();
+            drawChessBoard();
+            step = 0;
         }
     </script>
 </body>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+</head>
+<body>
+    <h2>timer1</h2>
+    <h1 id="timer1">00:00:00</h1>
+    <hr>
+    <h2>timer2</h2>
+    <h1 id="timer2">00:00:00</h1>
+    <hr>
+    <!-- <button id="switchTimer">切換計時器</button> -->
+    <script>
+        let timerInterval1;
+        let timerInterval2;
+        let timerIntervalArr = [timerInterval1, timerInterval2];
+        let timeInSeconds1 = 15; // 设置倒计时秒数
+        let timeInSeconds2 = 10; // 设置倒计时秒数
+        let timeInSecondsArr = [timeInSeconds1, timeInSeconds2];
+        let timerIdArr = ['timer1', 'timer2'];
+        let step = 0; //點擊次數
+
+        function startTimer(timerIndex) {
+            timerIntervalArr[timerIndex] = setInterval(function() {
+                updateTimer(timeInSecondsArr[timerIndex], timerIndex);
+            }, 1000);
+        }
+
+        function stopTimer(timerIndex) {
+            clearInterval(timerIntervalArr[timerIndex]);
+        }
+
+        function updateTimer(timeInSeconds, timerIndex) {
+            let hours = Math.floor(timeInSeconds / 3600);
+            let minutes = Math.floor((timeInSeconds % 3600) / 60);
+            let seconds = timeInSeconds % 60;
+
+            // 添加前导零
+            hours = String(hours).padStart(2, '0');
+            minutes = String(minutes).padStart(2, '0');
+            seconds = String(seconds).padStart(2, '0');
+
+            document.getElementById(timerIdArr[timerIndex]).textContent = hours + ":" + minutes + ":" + seconds;
+
+            if (timeInSeconds <= 0) {
+                clearInterval(timerIntervalArr[timerIndex]);
+                alert("Time's up!");
+            } else {
+                timeInSeconds--;
+                timeInSecondsArr[timerIndex] = timeInSeconds;
+            }
+        }
+        // 進入頁面時呈現剩餘時間
+        updateTimer(timeInSeconds1, 0);
+        updateTimer(timeInSeconds2, 1);
+        // 進入頁面執行timer1，step增加時，暫停timer1，切換為執行timer2
+        startTimer(step % 2);
+
+        // 监听鼠标左键点击事件
+        document.addEventListener('click', function(event) {
+            if (event.button === 0) { // 检查是否为左键点击
+                // 停止当前计时器
+                stopTimer(step % 2);
+                
+                // 切换至另一个计时器
+                step++;
+                startTimer(step % 2);
+            }
+        });
+    </script>
+</body>
+</html>
