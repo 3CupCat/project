@@ -64,7 +64,7 @@
                 <h2>剩餘時間</h2>
                 <h1 id="timer1">00:00:00</h1>
             </div>
-            <button>悔棋</button>
+            <button onclick="redo()">悔棋</button>
         </div>
         <!-- 黑棋手 -->
         <!-- 嘗試棋格大小40、棋子大小36、棋盤大小640*640、起點40~終點600 -->
@@ -185,14 +185,6 @@
             ctx.strokeStyle = "#000000";
             ctx.stroke();
         }
-        // // 繪製奕子
-        // function myChess(x, y, color) {
-        //     ctx.beginPath();
-        //     ctx.arc(x, y, 18, 0, Math.PI * 2);
-        //     ctx.closePath();
-        //     ctx.fillStyle = color;
-        //     ctx.fill();
-        // }
         // 清空奕子資料
         function clearChessMapArr() {
             for (let i = 0; i < 15; i++) {
@@ -202,26 +194,6 @@
                 }
             }
         }
-        // // 清空棋盤
-        // function clearChessBoard() {
-        //     ctx.fillStyle = "#d8af3e";
-        //     ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // }
-        // // 繪製棋盤
-        // function drawChessBoard() {
-        //     for (let i = 0; i < 15; i++) {
-        //         ctx.beginPath();
-        //         // row
-        //         ctx.moveTo(40, `${(i * 40) + 40}`);
-        //         ctx.lineTo(600, `${(i * 40) + 40}`);
-        //         // col
-        //         ctx.moveTo(`${(i * 40) + 40}`, 40);
-        //         ctx.lineTo(`${(i * 40) + 40}`, 600);
-        //         ctx.closePath();
-        //         ctx.strokeStyle = "#000000";
-        //         ctx.stroke();
-        //     }
-        // }
         // 遊戲結束彈跳圖片
         // 帶勝者資料，產生對應圖片
         function gameOver(chess) {
@@ -253,70 +225,12 @@
         function stopTimer(timerIndex) {
             clearInterval(timerIntervalArr[timerIndex]);
         }
-
-        function updateTimer(timeInSeconds, timerIndex) {
-            let hours = Math.floor(timeInSeconds / 3600);
-            let minutes = Math.floor((timeInSeconds % 3600) / 60);
-            let seconds = timeInSeconds % 60;
-
-            // 時間格式調整為00:00:00
-            hours = String(hours).padStart(2, '0');
-            minutes = String(minutes).padStart(2, '0');
-            seconds = String(seconds).padStart(2, '0');
-
-            document.getElementById(timerIdArr[timerIndex]).textContent = hours + ":" + minutes + ":" + seconds;
-
-            if (timeInSeconds <= 0) {
-                clearInterval(timerIntervalArr[timerIndex]);
-                gameOver(chessColor[(step + 1) % 2]);
-            } else {
-                timeInSeconds--;
-                timeInSecondsArr[timerIndex] = timeInSeconds;
-            }
-        }
         // 進入頁面時呈現剩餘時間
         updateTimer(timeInSeconds1, 0);
         updateTimer(timeInSeconds2, 1);
         // 進入頁面執行timer1，step增加時，暫停timer1，切換為執行timer2
         startTimer(step % 2);
 
-        // 滑鼠點擊後，生出奕子
-        canvas.addEventListener('click', function (e) {
-            // 小於邊界設定，點擊不生出奕子
-            if (e.offsetX < 20 || e.offsetX > 620 || e.offsetY < 20 || e.offsetY > 620) {
-                return;
-            }
-            // 變數紀錄奕子x、y軸
-            let xAxis = Math.floor((e.offsetX + 20) / 40) * 40;
-            let yAxis = Math.floor((e.offsetY + 20) / 40) * 40;
-            // 變數紀錄是否有勝者
-            let temp;
-            // 檢查當前位置是否沒有奕子
-            if (chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] == 0) {
-                // 呼叫繪製奕子function
-                myChess(xAxis, yAxis, chessColor[step % 2]);
-                // 繪製奕子後，把資料儲存到陣列中
-                chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] = chessColor[step % 2];
-                // 檢查陣列用
-                // console.log(chessMapArr);
-                // 檢查是否五連珠
-                for (let i = 0; i < 4; i++) {
-                    temp = checkWin(xAxis / 40 - 1, yAxis / 40 - 1, chessColor[step % 2], checkMode[i]);
-                    if (temp === true) {
-                        // 倒計時暫停
-                        stopTimer(step % 2);
-                        return;
-                    }
-                }
-                // 倒計時暫停
-                stopTimer(step % 2);
-                // 計算步數
-                step++;
-                // 倒計時換方
-                startTimer(step % 2);
-            }
-
-        })
         function checkWin(x, y, chess, checkModeArr) {
             // 紀錄連珠數
             let cnt = 1;
@@ -351,19 +265,10 @@
                 return true;
             }
         }
-        // 關閉勝利圖、開始下一局
-        function newGame() {
-            document.getElementById('overlay').style.display = 'none';
-            clearChessMapArr();
-            clearChessBoard();
-            drawChessBoard();
-            step = 0;
-            resetTimer(timeInSecondsArr);
-        }
         // 重置倒計時
         function resetTimer(resetTimerArr) {
             for (let i = 0; i < timeInSecondsArr.length; i++) {
-                resetTimerArr[i] = 3600;
+                resetTimerArr[i] = 3000;
                 updateTimer(resetTimerArr[i], i);
             }
             startTimer(step % 2);
@@ -397,66 +302,154 @@
             ctx.fillStyle = color;
             ctx.fill();
         }
+        // 紀錄上一步位置，初始值為null
+        let lastMove = null;
+        // 紀錄上一步時間
+        let lastMoveTime; 
         // 悔棋功能
-        // 邏輯: 另一方未下棋前，可以點擊該按鈕(在按鈕上面下判斷 disabled)
-        // 功能: canvas上棋盤需要重新渲染(如果是邊界還要判斷)、chessMapArr需要設置為0、另一方的時間需要恢復為開始前(需要一個變數儲存)、按下悔棋step--
-        let lastMove = [0, 0]; // 紀錄上一步位置[x, y]
-        let lastMoveTime; // 紀錄上一步時間
-        function redo(chessMap, timerIndex) {
-            // chessMapArr還原
+        function redo() {
+            // 尚未下棋時，阻擋執行悔棋
+            if (lastMove === null) {
+                return;
+            }
+            // 連續觸發悔棋阻擋
+            if (lastMove[0] === -1 || lastMove[1] === -1) {
+                return;
+            }
+            // 將index轉換為x、y軸座標
+            let xAxis = (lastMove[0] + 1) * 40;
+            let yAxis = (lastMove[1] + 1) * 40;
+            // chessMapArr初始化
             chessMapArr[lastMove[0]][lastMove[1]] = 0;
             // 重新渲染棋盤
             ctx.beginPath();
-            ctx.arc(lastMove[0] * 40, lastMove[1] * 40, 18, 0, Math.PI * 2); // 以0,0為例，會在40,40畫半徑18的圓
+            // 以0,0為例，會在40,40畫半徑18的圓，不過PI會有一點多出來，所以設定半徑19
+            ctx.arc(xAxis, yAxis, 19, 0, Math.PI * 2); 
+            ctx.closePath();
             ctx.fillStyle = "#d8af3e";
             ctx.fill();
-            // 檢查是否為邊界
-            // row、col需要補上被重新渲染的畫布(注意: 半徑18的圓)
-            // x、y可能相反喔 (回去看看)
-            // 思考這邊的變化有幾種，再來想怎麼寫
+            // 檢查是否為邊界、並重新渲染畫布
             // 檢查row
+            ctx.beginPath();
             if (lastMove[0] == 0) {
-                ctx.moveTo((lastMove[0] + 1) * 40, (lastMove[0] + 1) * 40);
-                ctx.lineTo((lastMove[0] + 1) * 40, (lastMove[0] + 1) * 40 + 18);
+                ctx.moveTo(xAxis, yAxis);
+                ctx.lineTo(xAxis + 19, yAxis);
             }
-            else if (lastMove[0] == 15) {
-                ctx.moveTo((lastMove[0] + 1) * 40, (lastMove[0] + 1) * 40);
-                ctx.lineTo((lastMove[0] + 1) * 40, (lastMove[0] + 1) * 40 + 18);
+            else if (lastMove[0] == 14) {
+                ctx.moveTo(xAxis, yAxis);
+                ctx.lineTo(xAxis - 19, yAxis);
             }
             else {
-                ctx.moveTo(40, `${(index * 40) + 40}`);
-                ctx.lineTo(目的地y, `${(index * 40) + 40}`);
+                ctx.moveTo(xAxis - 19, yAxis);
+                ctx.lineTo(xAxis + 19, yAxis);
             }
             // 檢查col
             if (lastMove[1] == 0) {
-                ctx.moveTo(40, `${(index * 40) + 40}`);
-                ctx.lineTo(目的地y, `${(index * 40) + 40}`);
+                ctx.moveTo(xAxis, yAxis);
+                ctx.lineTo(xAxis, yAxis + 19);
             }
-            else if (lastMove[1] == 15) {
-                ctx.moveTo(40, `${(index * 40) + 40}`);
-                ctx.lineTo(目的地y, `${(index * 40) + 40}`);
+            else if (lastMove[1] == 14) {
+                ctx.moveTo(xAxis, yAxis);
+                ctx.lineTo(xAxis, yAxis - 19);
             }
             else {
-                ctx.moveTo(40, `${(index * 40) + 40}`);
-                ctx.lineTo(目的地y, `${(index * 40) + 40}`);
+                ctx.moveTo(xAxis, yAxis - 19);
+                ctx.lineTo(xAxis, yAxis + 19);
             }
-            // // row
-            // ctx.moveTo(40, `${(index * 40) + 40}`);
-            // ctx.lineTo(目的地y, `${(index * 40) + 40}`);
-            // // col
-            // ctx.moveTo(`${(index * 40) + 40}`, 40);
-            // ctx.lineTo(`${(index * 40) + 40}`, 目的地x);
             ctx.closePath();
             ctx.strokeStyle = "#000000";
             ctx.stroke();
+            // 換方倒計時、還原開始前時間
+            stopTimer(step % 2);
+            timeInSecondsArr[step % 2] = lastMoveTime;
+            startTimer((step + 1) % 2);
+            // 更新倒數計時
+            for (let i = 0; i < timeInSecondsArr.length; i++) {
+                updateTimer(timeInSecondsArr[i], i);
+            }
+            // 設定為-1，用以判斷連續觸發悔棋
+            lastMove = [-1, -1];
             // step校正
             step--;
-            // 換方倒計時、還原開始前時間
-            stopTimer(當前棋手);
-            timeInSecondsArr[當前棋手] = 紀錄上一步時間;
-            startTimer(悔棋棋手);
         }
+        // 滑鼠點擊後，生出奕子
+        canvas.addEventListener('click', function (e) {
+            // 小於邊界設定，點擊不生出奕子
+            if (e.offsetX < 20 || e.offsetX > 620 || e.offsetY < 20 || e.offsetY > 620) {
+                return;
+            }
+            // 變數紀錄奕子x、y軸
+            let xAxis = Math.floor((e.offsetX + 20) / 40) * 40;
+            let yAxis = Math.floor((e.offsetY + 20) / 40) * 40;
+            // 變數紀錄是否有勝者
+            let temp;
+            // 檢查當前位置是否沒有奕子
+            if (chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] == 0) {
+                // 呼叫繪製奕子function
+                myChess(xAxis, yAxis, chessColor[step % 2]);
+                // 繪製奕子後，把資料儲存到陣列中
+                chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] = chessColor[step % 2];
+                // 檢查陣列用
+                // console.log(chessMapArr);
+                // 檢查是否五連珠
+                for (let i = 0; i < 4; i++) {
+                    temp = checkWin(xAxis / 40 - 1, yAxis / 40 - 1, chessColor[step % 2], checkMode[i]);
+                    if (temp === true) {
+                        // 倒計時暫停
+                        stopTimer(step % 2);
+                        return;
+                    }
+                }
+                // 儲存上一步的index
+                lastMove = [(xAxis / 40) - 1, (yAxis / 40) - 1];
+                // 檢查用
+                // console.log(lastMoveTime);
+                // console.log(`timeInSeconds1為${timeInSeconds1}`);
+                // console.log(`timeInSeconds1為${timeInSeconds2}`);
+                // console.log(`timeInSecondsArr[0]為${timeInSecondsArr[0]}`);
+                // console.log(`timeInSecondsArr[1]為${timeInSecondsArr[1]}`);
 
+                // 儲存對手剩餘時間；updateTimer會執行Math.floor，因此將時間+1調整誤差
+                lastMoveTime = step % 2 == 0 ? timeInSecondsArr[1] + 1 : timeInSecondsArr[0] + 1;
+                // 倒計時暫停
+                stopTimer(step % 2);
+                // 計算步數
+                step++;
+                // 倒計時換方
+                startTimer(step % 2);
+            }
+        })
+        // 關閉勝利圖、開始下一局
+        function newGame() {
+            document.getElementById('overlay').style.display = 'none';
+            clearChessMapArr();
+            clearChessBoard();
+            drawChessBoard();
+            step = 0;
+            resetTimer(timeInSecondsArr);
+            lastMove = null;
+            lastMoveTime = undefined;
+        }
+        function updateTimer(timeInSeconds, timerIndex) {
+            let hours = Math.floor(timeInSeconds / 3600);
+            let minutes = Math.floor((timeInSeconds % 3600) / 60);
+            let seconds = timeInSeconds % 60;
+
+            // 時間格式調整為00:00:00
+            hours = String(hours).padStart(2, '0');
+            minutes = String(minutes).padStart(2, '0');
+            seconds = String(seconds).padStart(2, '0');
+
+            document.getElementById(timerIdArr[timerIndex]).textContent = hours + ":" + minutes + ":" + seconds;
+
+            if (timeInSeconds <= 0) {
+                clearInterval(timerIntervalArr[timerIndex]);
+                gameOver(chessColor[(step + 1) % 2]);
+            } else {
+                timeInSeconds--;
+                timeInSecondsArr[timerIndex] = timeInSeconds;
+            }
+        }
     </script>
     <!-- 推播 -->
     <script>
