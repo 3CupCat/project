@@ -64,7 +64,7 @@
                 <h2>剩餘時間</h2>
                 <h1 id="timer1">00:00:00</h1>
             </div>
-            <button onclick="redo()">悔棋</button>
+            <button id="redoForBlack">悔棋</button>
         </div>
         <!-- 黑棋手 -->
         <!-- 嘗試棋格大小40、棋子大小36、棋盤大小640*640、起點40~終點600 -->
@@ -84,6 +84,7 @@
                 <h2>剩餘時間</h2>
                 <h1 id="timer2">00:00:00</h1>
             </div>
+            <button id="redoForWhite">悔棋</button>
         </div>
         <!-- 白棋手 -->
         <!-- 意見反饋按鈕 -->
@@ -206,7 +207,7 @@
                 document.getElementById('popupImg').src = './img/whiteWin.png';
             }
         }
-        // 測試計時器
+        // 計時器
         let timerInterval1;
         let timerInterval2;
         let timerIntervalArr = [timerInterval1, timerInterval2];
@@ -273,7 +274,6 @@
             }
             startTimer(step % 2);
         }
-        // 測試中 --------------------------
         // 清空棋盤
         function clearChessBoard() {
             ctx.fillStyle = "#d8af3e";
@@ -305,7 +305,7 @@
         // 紀錄上一步位置，初始值為null
         let lastMove = null;
         // 紀錄上一步時間
-        let lastMoveTime; 
+        let lastMoveTime;
         // 悔棋功能
         function redo() {
             // 尚未下棋時，阻擋執行悔棋
@@ -324,7 +324,7 @@
             // 重新渲染棋盤
             ctx.beginPath();
             // 以0,0為例，會在40,40畫半徑18的圓，不過PI會有一點多出來，所以設定半徑19
-            ctx.arc(xAxis, yAxis, 19, 0, Math.PI * 2); 
+            ctx.arc(xAxis, yAxis, 19, 0, Math.PI * 2);
             ctx.closePath();
             ctx.fillStyle = "#d8af3e";
             ctx.fill();
@@ -405,7 +405,7 @@
                 // 檢查用
                 // console.log(lastMoveTime);
                 // console.log(`timeInSeconds1為${timeInSeconds1}`);
-                // console.log(`timeInSeconds1為${timeInSeconds2}`);
+                // console.log(`timeInSeconds2為${timeInSeconds2}`);
                 // console.log(`timeInSecondsArr[0]為${timeInSecondsArr[0]}`);
                 // console.log(`timeInSecondsArr[1]為${timeInSecondsArr[1]}`);
 
@@ -417,19 +417,10 @@
                 step++;
                 // 倒計時換方
                 startTimer(step % 2);
+                // 檢查悔棋
+                disabledRedo();
             }
         })
-        // 關閉勝利圖、開始下一局
-        function newGame() {
-            document.getElementById('overlay').style.display = 'none';
-            clearChessMapArr();
-            clearChessBoard();
-            drawChessBoard();
-            step = 0;
-            resetTimer(timeInSecondsArr);
-            lastMove = null;
-            lastMoveTime = undefined;
-        }
         function updateTimer(timeInSeconds, timerIndex) {
             let hours = Math.floor(timeInSeconds / 3600);
             let minutes = Math.floor((timeInSeconds % 3600) / 60);
@@ -449,6 +440,72 @@
                 timeInSeconds--;
                 timeInSecondsArr[timerIndex] = timeInSeconds;
             }
+        }
+        // 檢查悔棋
+        function disabledRedo() {
+            // 遊戲開始時，都不能悔棋
+            if (step == 0) {
+                document.getElementById('redoForBlack').disabled = true;
+                document.getElementById('redoForWhite').disabled = true;
+            }
+            // 白方下棋，沒有悔棋次數
+            else if (step % 2 == 0 && redoLimit2 == 0) {
+                document.getElementById('redoForBlack').disabled = true;
+                document.getElementById('redoForWhite').disabled = true;
+            }
+            // 白方下棋，有悔棋次數
+            else if (step % 2 == 0 && redoLimit2 != 0) {
+                document.getElementById('redoForBlack').disabled = true;
+                document.getElementById('redoForWhite').disabled = false;
+            }
+            // 黑方下棋，沒有悔棋次數
+            else if (step % 2 != 0 && redoLimit1 == 0) {
+                document.getElementById('redoForBlack').disabled = true;
+                document.getElementById('redoForWhite').disabled = true;
+            }
+            // 黑方下棋，有悔棋次數
+            else {
+                document.getElementById('redoForBlack').disabled = false;
+                document.getElementById('redoForWhite').disabled = true;
+            }
+        }
+        disabledRedo();
+        // 悔棋次數
+        let redoLimit1 = 1;
+        let redoLimit2 = 1;
+        let redoForBlack = document.getElementById('redoForBlack');
+        let redoForWhite = document.getElementById('redoForWhite');
+        // 載入時，按鈕上呈現悔棋計數
+        document.getElementById('redoForBlack').innerText = `悔棋(${redoLimit1})`;
+        document.getElementById('redoForWhite').innerText = `悔棋(${redoLimit2})`;
+        // 點擊悔棋按鈕時，執行悔棋、悔棋次數減少、更新按鈕計數、不得連續悔棋
+        redoForBlack.addEventListener('click', function (e) {
+            redo();
+            redoLimit1--;
+            document.getElementById('redoForBlack').innerText = `悔棋(${redoLimit1})`;
+            document.getElementById('redoForBlack').disabled = true;
+        })
+        redoForWhite.addEventListener('click', function (e) {
+            redo();
+            redoLimit2--;
+            document.getElementById('redoForWhite').innerText = `悔棋(${redoLimit2})`;
+            document.getElementById('redoForWhite').disabled = true;
+        })
+        // 關閉勝利圖、開始下一局
+        function newGame() {
+            document.getElementById('overlay').style.display = 'none';
+            clearChessMapArr();
+            clearChessBoard();
+            drawChessBoard();
+            step = 0;
+            resetTimer(timeInSecondsArr);
+            lastMove = null;
+            lastMoveTime = undefined;
+            redoLimit1 = 1;
+            redoLimit2 = 1;
+            document.getElementById('redoForBlack').innerText = `悔棋(${redoLimit1})`;
+            document.getElementById('redoForWhite').innerText = `悔棋(${redoLimit2})`;
+            disabledRedo();
         }
     </script>
     <!-- 推播 -->
