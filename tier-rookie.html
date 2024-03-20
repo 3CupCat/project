@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新手房</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+        integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"
+        integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            background-image: url('./img/bamboo_forest.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false">
+    <div class="d-flex justify-content-end mt-3 me-3">
+        <a href="./index.html" class="btn btn-outline-light btn-lg"><i class="fa-solid fa-arrow-left"></i> 離開</a>
+    </div>
+    <!-- 調整排版為三欄 -->
+    <div class="container d-flex mt-2">
+        <!-- 黑棋手 -->
+        <div class="ms-auto me-2 pt-3 player-black">
+            <div>
+                <h2 class="pt-2 pb-1">黑方棋手</h2>
+                <img class="img-fluid rounded" src="./img/blackPlayer.png" alt="黑方棋手">
+            </div>
+            <div class="pt-3 pb-3">
+                <h2>剩餘時間</h2>
+                <h1 id="timer1">00:00:00</h1>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button id="redoForBlack" class="btn btn-primary btn-lg">悔棋</button>
+            </div>
+        </div>
+        <!-- 黑棋手 -->
+        <!-- 嘗試棋格大小40、棋子大小36、棋盤大小640*640、起點40~終點600 -->
+        <canvas id="chessBoard" style="background-color: #d8af3e;"></canvas>
+        <!-- 白棋手 -->
+        <div class="me-auto ms-2 pt-3 player-white">
+            <div>
+                <h2 class="pt-2 pb-1">白方棋手</h2>
+                <img class="img-fluid rounded" src="./img/whitePlayer.png" alt="白方棋手">
+            </div>
+            <div class="pt-3 pb-3">
+                <h2>剩餘時間</h2>
+                <h1 id="timer2">00:00:00</h1>
+            </div>
+            <div class="d-flex justify-content-center">
+                <button id="redoForWhite" class="btn btn-primary btn-lg">悔棋</button>
+            </div>
+        </div>
+        <!-- 白棋手 -->
+        <!-- 勝利圖片 -->
+        <div id="overlay" onclick="newGame()">
+            <img id="popupImg" src="" alt="勝者">
+        </div>
+        <!-- 勝利圖片 -->
+        <!-- 意見反饋按鈕 -->
+        <a href="#" class="btn-order position-fixed" data-bs-toggle="modal" data-bs-target="#feedBack">意見反饋</a>
+        <!-- 意見反饋表單 -->
+        <div class="modal fade" id="feedBack" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="feedBackLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="feedBackLabel">意見反饋</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <small class="small text-danger">※當遊戲處於背景時，剩餘時間仍在倒數。</small>
+                        <form action="#" method="post" enctype="multipart/form-data" autocomplete="off">
+                            <div>
+                                <label for="purpose" class="mb-1">聯絡目的</label>
+                                <select name="purpose" id="purpose" class="form-control mb-2">
+                                    <option disabled selected="true">請選擇項目</option>
+                                    <option>Bug回報</option>
+                                    <option>遊戲建議</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="user_name" class="mb-1">姓名</label>
+                                <input type="text" name="user_name" id="user_name" placeholder="請輸入姓名"
+                                    class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone" class="mb-1">電話</label>
+                                <input type="tel" name="phone" id="phone" placeholder="請輸入電話" class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="file" class="mb-1">上傳附件</label>
+                                <input type="file" name="file" id="file" class="form-control mb-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="message" class="mb-1">內容</label>
+                                <textarea name="message" id="message" cols="30" rows="5" placeholder="請輸入內容"
+                                    class="form-control mb-2"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <!-- 目前沒有資料庫，下方確定一樣設定data-bs-dismiss -->
+                        <button type="button" class="btn btn-primary" id="liveToastBtn"
+                            data-bs-dismiss="modal">確定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 意見反饋送出後推播 -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <img src="./img/logo.png" class="rounded me-2 img-fluid" style="height: 20px;">
+                    <strong class="me-auto">五子棋</strong>
+                    <strong class="ms-auto"><i class="fa-solid fa-envelope-circle-check"
+                            style="color: #63E6BE;"></i></strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    發送成功，謝謝您寶貴的意見 ~
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // 設置倒計時秒數
+        let timeInSeconds1 = 3600;
+        let timeInSeconds2 = 3600;
+        let timeInSecondsArr = [timeInSeconds1, timeInSeconds2];
+        let timerIdArr = ['timer1', 'timer2'];
+        // 悔棋次數
+        let redoLimit1 = 10;
+        let redoLimit2 = 10;
+        // 重置倒計時
+        function resetTimer(resetTimerArr) {
+            for (let i = 0; i < timeInSecondsArr.length; i++) {
+                resetTimerArr[i] = 3600;
+                updateTimer(resetTimerArr[i], i);
+            }
+            startTimer(step % 2);
+        }
+        // 滑鼠點擊後，生出棋子
+        canvas.addEventListener('click', function (e) {
+            // 小於邊界設定，點擊不生出棋子
+            if (e.offsetX < 20 || e.offsetX > 620 || e.offsetY < 20 || e.offsetY > 620) {
+                return;
+            }
+            // 變數紀錄棋子x、y軸
+            let xAxis = Math.floor((e.offsetX + 20) / 40) * 40;
+            let yAxis = Math.floor((e.offsetY + 20) / 40) * 40;
+            // 變數紀錄是否有勝者
+            let temp;
+            // 檢查當前位置是否沒有棋子
+            if (chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] == 0) {
+                // 呼叫繪製棋子function
+                myChess(xAxis, yAxis, chessColor[step % 2]);
+                // 繪製棋子後，把資料儲存到陣列中
+                chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] = chessColor[step % 2];
+                // 檢查陣列用
+                // console.log(chessMapArr);
+                // 檢查是否五連珠
+                for (let i = 0; i < 4; i++) {
+                    temp = checkWin(xAxis / 40 - 1, yAxis / 40 - 1, chessColor[step % 2], checkMode[i]);
+                    if (temp === true) {
+                        // 倒計時暫停
+                        stopTimer(step % 2);
+                        return;
+                    }
+                }
+                // 儲存上一步的index
+                lastMove = [(xAxis / 40) - 1, (yAxis / 40) - 1];
+                // 檢查用
+                // console.log(lastMoveTime);
+                // console.log(`timeInSeconds1為${timeInSeconds1}`);
+                // console.log(`timeInSeconds2為${timeInSeconds2}`);
+                // console.log(`timeInSecondsArr[0]為${timeInSecondsArr[0]}`);
+                // console.log(`timeInSecondsArr[1]為${timeInSecondsArr[1]}`);
+
+                // 儲存對手剩餘時間；updateTimer會執行Math.floor，因此將時間+1調整誤差
+                lastMoveTime = step % 2 == 0 ? timeInSecondsArr[1] + 1 : timeInSecondsArr[0] + 1;
+                // 倒計時暫停
+                stopTimer(step % 2);
+                // 計算步數
+                step++;
+                // 倒計時換方
+                startTimer(step % 2);
+                // 檢查悔棋
+                disabledRedo();
+            }
+        })
+    </script>
+    <script src="./js/script.js"></script>
+</body>
+
+</html>

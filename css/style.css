@@ -1,0 +1,58 @@
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+#overlay img {
+    max-width: 80%;
+    max-height: 80%;
+}
+.position-fixed {
+    position: fixed;
+}
+.btn-order {
+    width: 125px;
+    color: white;
+    background-color: #3181ff;
+    line-height: 60px;
+    right: 0;
+    bottom: 10%;
+    margin-bottom: 30px;
+    text-align: center;
+    text-decoration: none;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    box-shadow: 0 0 2px rgb(255, 255, 255);
+}
+.btn-order:hover {
+    width: 180px;
+    color: white;
+    transition: all 150ms;
+}
+.btn-order:visited {
+    color: white;
+}
+.player-black {
+    position: relative;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+}
+.player-white {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+}
+.carousel-item>img{
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+}
