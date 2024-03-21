@@ -161,55 +161,6 @@
             }
             startTimer(step % 2);
         }
-        // 滑鼠點擊後，生出棋子
-        canvas.addEventListener('click', function (e) {
-            // 小於邊界設定，點擊不生出棋子
-            if (e.offsetX < 20 || e.offsetX > 620 || e.offsetY < 20 || e.offsetY > 620) {
-                return;
-            }
-            // 變數紀錄棋子x、y軸
-            let xAxis = Math.floor((e.offsetX + 20) / 40) * 40;
-            let yAxis = Math.floor((e.offsetY + 20) / 40) * 40;
-            // 變數紀錄是否有勝者
-            let temp;
-            // 檢查當前位置是否沒有棋子
-            if (chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] == 0) {
-                // 呼叫繪製棋子function
-                myChess(xAxis, yAxis, chessColor[step % 2]);
-                // 繪製棋子後，把資料儲存到陣列中
-                chessMapArr[(xAxis / 40) - 1][(yAxis / 40) - 1] = chessColor[step % 2];
-                // 檢查陣列用
-                // console.log(chessMapArr);
-                // 檢查是否五連珠
-                for (let i = 0; i < 4; i++) {
-                    temp = checkWin(xAxis / 40 - 1, yAxis / 40 - 1, chessColor[step % 2], checkMode[i]);
-                    if (temp === true) {
-                        // 倒計時暫停
-                        stopTimer(step % 2);
-                        return;
-                    }
-                }
-                // 儲存上一步的index
-                lastMove = [(xAxis / 40) - 1, (yAxis / 40) - 1];
-                // 檢查用
-                // console.log(lastMoveTime);
-                // console.log(`timeInSeconds1為${timeInSeconds1}`);
-                // console.log(`timeInSeconds2為${timeInSeconds2}`);
-                // console.log(`timeInSecondsArr[0]為${timeInSecondsArr[0]}`);
-                // console.log(`timeInSecondsArr[1]為${timeInSecondsArr[1]}`);
-
-                // 儲存對手剩餘時間；updateTimer會執行Math.floor，因此將時間+1調整誤差
-                lastMoveTime = step % 2 == 0 ? timeInSecondsArr[1] + 1 : timeInSecondsArr[0] + 1;
-                // 倒計時暫停
-                stopTimer(step % 2);
-                // 計算步數
-                step++;
-                // 倒計時換方
-                startTimer(step % 2);
-                // 檢查悔棋
-                disabledRedo();
-            }
-        })
     </script>
     <script src="./js/script.js"></script>
 </body>
