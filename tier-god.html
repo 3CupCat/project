@@ -207,8 +207,9 @@
         let timeInSecondsArr = [timeInSeconds1, timeInSeconds2];
         let timerIdArr = ['timer1', 'timer2'];
         // 悔棋次數
-        let redoLimit1 = 0;
-        let redoLimit2 = 0;
+        let redoLimit = 0;
+        let redoLimit1 = redoLimit;
+        let redoLimit2 = redoLimit;
         // 紀錄上一步位置，初始值為null
         let lastMove = null;
         // 紀錄上一步時間
@@ -461,8 +462,8 @@
             resetTimer(timeInSecondsArr);
             lastMove = null;
             lastMoveTime = undefined;
-            redoLimit1 = 1;
-            redoLimit2 = 1;
+            redoLimit1 = redoLimit;
+            redoLimit2 = redoLimit;
             document.getElementById('redoForBlack').innerText = `悔棋(${redoLimit1})`;
             document.getElementById('redoForWhite').innerText = `悔棋(${redoLimit2})`;
             disabledRedo();

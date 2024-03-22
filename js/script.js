@@ -295,8 +295,8 @@ function newGame() {
     resetTimer(timeInSecondsArr);
     lastMove = null;
     lastMoveTime = undefined;
-    redoLimit1 = 1;
-    redoLimit2 = 1;
+    redoLimit1 = redoLimit;
+    redoLimit2 = redoLimit;
     document.getElementById('redoForBlack').innerText = `悔棋(${redoLimit1})`;
     document.getElementById('redoForWhite').innerText = `悔棋(${redoLimit2})`;
     disabledRedo();

@@ -151,8 +151,9 @@
         let timeInSecondsArr = [timeInSeconds1, timeInSeconds2];
         let timerIdArr = ['timer1', 'timer2'];
         // 悔棋次數
-        let redoLimit1 = 10;
-        let redoLimit2 = 10;
+        let redoLimit = 10;
+        let redoLimit1 = redoLimit;
+        let redoLimit2 = redoLimit;
         // 重置倒計時
         function resetTimer(resetTimerArr) {
             for (let i = 0; i < timeInSecondsArr.length; i++) {
